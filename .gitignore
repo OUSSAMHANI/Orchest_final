@@ -1,0 +1,8 @@
+workspace/ 
+__pycache__/ 
+*.pyc 
+.env 
+.venv/ 
+venv/ 
+*.log 
+.pytest_cache/ 
