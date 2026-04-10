@@ -1,7 +1,18 @@
 """
 Planner Module
 Generates execution plans using LLM (dynamic, no hardcoded intent mapping).
-"""
+"""# At the very top of planner.py, before any other imports
+import sys
+import types
+
+# Patch langchain.debug
+try:
+    import langchain
+    if not hasattr(langchain, 'debug'):
+        langchain.debug = False
+        print("[PATCH] langchain.debug fixed in orchestrator")
+except ImportError:
+    pass
 
 import json
 import re

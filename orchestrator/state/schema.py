@@ -124,6 +124,7 @@ def get_ticket_summary(state: OrchestratorState) -> Dict[str, Any]:
         "branch": ticket.get("branch"),
         "labels": ticket.get("labels", []),
         "workspace_path": state.get("workspace_path"),
+        "mr_diff": ticket.get("mr_diff", ""),  # ← Add mr_diff to summary
     }
 
 

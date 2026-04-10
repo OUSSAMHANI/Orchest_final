@@ -204,6 +204,7 @@ class StepExecutor:
             "step_description": step.get("description", ""),
             "plan": state.get("plan"),
             "metadata": state.get("metadata", {}),
+            "mr_diff": ticket.get("mr_diff", ""),  # ← ADD THIS LINE
         }
     
     def _handle_success(

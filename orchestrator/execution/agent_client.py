@@ -81,7 +81,13 @@ class AgentClient:
         from shared.config.settings import get_settings
         settings = get_settings()
         if settings.MOCK_AGENTS:
-            return {"status": "success", "output": {"mock": True}, "confidence": 0.9, "step_id": step_id}
+            return {
+                "status": "success",
+                "output": {"mock": True},
+                "confidence": 0.9,
+                "step_id": step_id,
+                "completed_at": datetime.utcnow().isoformat()
+            }
         
         # Get agent endpoint from config or default
         agent_config = self.config.get("agents", {}).get(agent_name, {})
@@ -136,6 +142,7 @@ class AgentClient:
                 step_description=context.get("step_description", ""),
                 previous_outputs=context.get("previous_outputs", {}),
                 metadata=context.get("metadata", {}),
+                mr_diff=context.get("mr_diff", ""),
             )
             return payload.dict()
         except Exception as e:

@@ -194,6 +194,10 @@ class AgentInput(BaseModel):
         - llm_temperature: LLM temperature setting (0.0 to 1.0)
         """
     )
+    mr_diff: str = Field(
+        default="",
+        description="Git diff of the merge request that introduced/exposed the bug. Used by spec agent for bug localization."
+    )
     
     # ===== Validation =====
     @validator("workspace_path")
