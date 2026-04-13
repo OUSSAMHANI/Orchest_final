@@ -47,21 +47,7 @@ def read_file(path: str, start_line: int, end_line: int, repo_path: str) -> str:
         Path(repo_path) / absolute_path == absolute_path (comportement stdlib).
         La fonction fonctionne donc avec des chemins relatifs ET absolus.
     """
-    # Fix: Handle path duplication if path already contains repo_path
-    path_obj = Path(path)
-    
-    # If path is absolute, use it directly
-    if path_obj.is_absolute():
-        abs_path = path_obj
-    # If path already starts with repo_path, extract the relative part
-    elif repo_path and path.startswith(repo_path):
-        # Remove repo_path prefix to get relative path
-        rel_path = path[len(repo_path):].lstrip('/\\')
-        abs_path = Path(repo_path) / rel_path
-    else:
-        # Path is relative to repo_path
-        abs_path = Path(repo_path) / path
-    
+    abs_path = Path(repo_path) / path
     if not abs_path.is_file():
         logger.warning("[phase35] read_file: fichier introuvable : %s", abs_path)
         return ""
