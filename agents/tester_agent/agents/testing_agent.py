@@ -13,11 +13,15 @@ from typing import Any
 import yaml
 
 from agents.base_agent import BaseAgent
+from config.agent_config import AgentConfig
+from config.language_config import get_docker_image, get_hints
 from config.paths import AGENTS
 from state import AgentReport, GraphState
+from tools.docker.sandbox import run_tests_in_sandbox
 from tools.files import get_file_tools
 from tools.folders import initiate_directory
 from utils.language_detector import detect_language
+from langchain_core.tools import tool
 
 
 @lru_cache(maxsize=None)
@@ -61,7 +65,7 @@ def _build_catalogue_full() -> str:
 class TestingAgent(BaseAgent):
 
     agent_name = "testing_agent"
-    uses_tests = False   # writes tests, does not execute them → no test nudge
+    uses_tests = True   # participates in the "run tests" nudge
 
     # ── Required: context dict ────────────────────────────────────────────────
 
@@ -73,10 +77,12 @@ class TestingAgent(BaseAgent):
         self._cached_lang      = language
         self._cached_fw        = framework
 
+        hints               = get_hints(language)
         profile             = state.get("model_profile", {})
         verbose             = bool(profile.get("system_verbose"))
         max_spec            = int(profile.get("max_spec",     1_500))
         max_ticket          = int(profile.get("max_test_out", 800))
+        cfg                 = AgentConfig(self.agent_name)
 
         ticket = state.get("ticket_text", "")
         spec   = state.get("spec", "")
@@ -84,6 +90,10 @@ class TestingAgent(BaseAgent):
         return dict(
             detected_language   = language,
             detected_framework  = framework,
+            test_framework     = hints["framework"],
+            file_pattern       = hints["file_pattern"],
+            script_hint        = hints["script_hint"],
+            lang_conventions   = hints["convention"],
             tool_catalogue      = _build_catalogue(verbose),
             tool_catalogue_full = _build_catalogue_full(),
             file_list_str       = self._file_list(
@@ -104,7 +114,18 @@ class TestingAgent(BaseAgent):
     async def get_tools(self, state: GraphState) -> list:
         workspace_dir = self._workspace_dir(state)
         initiate_directory(workspace_dir)
-        return get_file_tools(workspace_dir)
+        language, _   = self._detect(state, workspace_dir)
+        docker_image  = get_docker_image(language)
+
+        @tool
+        def run_tests() -> str:
+            """Run the unit test suite inside a Docker sandbox."""
+            return run_tests_in_sandbox.invoke({
+                "workspace_path": workspace_dir,
+                "image_name":     docker_image,
+            })
+
+        return get_file_tools(workspace_dir) + [run_tests]
 
     # ── Optional: enrich AgentReport ─────────────────────────────────────────
 
