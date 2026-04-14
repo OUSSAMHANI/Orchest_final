@@ -28,6 +28,9 @@ Run the agent as a standalone API server.
 
 **Command:**
 ```powershell
+python scripts/test_tester.py
+```
+```powershell
 uvicorn agents.tester_agent.main:app --host 0.0.0.0 --port 8003
 ```
 The agent will be available at `http://localhost:8003`.

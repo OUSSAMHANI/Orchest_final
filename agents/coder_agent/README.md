@@ -11,6 +11,10 @@ A dedicated script allows you to run the agent logic directly from your terminal
 
 **Command:**
 ```powershell
+python scripts/test_coder.py
+```
+
+```powershell
 python scripts/test_coder.py --spec "Your task here" --workspace "workspace/test_coder"
 ```
 **Exemple of a command:**
