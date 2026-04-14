@@ -1,0 +1,34 @@
+base: |
+  Last test output:
+  {test_output_tail}
+
+sandbox_error: |
+  Sandbox/environment error — fix script.sh dependencies.
+  Check: missing system packages (apt-get), wrong Python/Node version, missing playwright install step,
+  or a relative path that doesn't resolve from /workspace/{workspace_path}.
+  Re-read script.sh with 'read_file', fix the Install section, then re-run.
+
+fix_hint: |
+  Fix failing tests. Read the implementation file first with 'read_file'.
+  Distinguish between:
+  • Test logic error  — assertion wrong, fixture missing, mock incorrect → fix the test.
+  • Implementation bug — code does not match the spec → DO NOT fix the source; report with:
+      FILE: <relative path>
+      LINE: <line number>
+      OBSERVED: <actual behaviour>
+      EXPECTED: <behaviour per spec>
+  Never silence failures with try/except or by weakening assertions.
+
+coverage_shortfall: |
+  Coverage is below the 80% threshold.
+  Read uncovered lines with 'read_file', then write additional tests for the missing branches.
+  Common gaps: exception handlers, early-return guards, else branches, and empty-collection edge cases.
+  Add tests in the appropriate sub-directory (unit/ for pure logic, integration/ for I/O paths).
+
+performance_regression: |
+  A performance assertion failed (response time / throughput threshold exceeded).
+  Before assuming a test threshold is wrong, check:
+  • Is the implementation doing unnecessary loops or N+1 queries?
+  • Is the test environment constrained (low CPU sandbox)?
+  If the environment is constrained, document the baseline and widen the threshold with a comment
+  explaining why, rather than silently removing the assertion.

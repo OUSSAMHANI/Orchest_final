@@ -1,0 +1,59 @@
+Python:
+  runner: "pytest"
+  file_pattern: "tests/unit/test_*.py tests/integration/test_*.py tests/e2e/test_*.py"
+  coverage_flag: "--cov=. --cov-report=term-missing --cov-fail-under=80"
+  mutation_hint: "pip install mutmut && mutmut run"
+
+Java:
+  runner: "mvn test"
+  file_pattern: "src/test/java/**/*Test.java"
+  coverage_flag: "-Pcoverage"         # assumes JaCoCo plugin in pom.xml
+  mutation_hint: "mvn org.pitest:pitest-maven:mutationCoverage"
+
+JavaScript:
+  runner: "npm test"
+  file_pattern: "tests/unit/*.test.js tests/integration/*.test.js tests/e2e/*.test.js"
+  coverage_flag: "--coverage --coverageThreshold='{\"global\":{\"lines\":80}}'"
+  mutation_hint: "npx stryker run"
+
+TypeScript:
+  runner: "npm test"
+  file_pattern: "tests/unit/*.test.ts tests/integration/*.test.ts tests/e2e/*.test.ts"
+  coverage_flag: "--coverage --coverageThreshold='{\"global\":{\"lines\":80}}'"
+  mutation_hint: "npx stryker run"
+
+PHP:
+  runner: "./vendor/bin/phpunit"
+  file_pattern: "tests/**/*Test.php"
+  coverage_flag: "--coverage-text --coverage-clover coverage.xml"
+  mutation_hint: "vendor/bin/infection --min-msi=70"
+
+Ruby:
+  runner: "bundle exec rspec"
+  file_pattern: "spec/**/*_spec.rb"
+  coverage_flag: "COVERAGE=true bundle exec rspec"
+  mutation_hint: "bundle exec mutant"
+
+C#:
+  runner: "dotnet test"
+  file_pattern: "**/*Tests.cs"
+  coverage_flag: "--collect:\"XPlat Code Coverage\" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Threshold=80"
+  mutation_hint: "dotnet stryker"
+
+Go:
+  runner: "go test ./..."
+  file_pattern: "*_test.go"
+  coverage_flag: "-cover -coverprofile=coverage.out && go tool cover -func=coverage.out"
+  mutation_hint: "go install github.com/zimmski/go-mutesting/...@latest && go-mutesting ./..."
+
+Swift:
+  runner: "swift test"
+  file_pattern: "Tests/**/*Tests.swift"
+  coverage_flag: "--enable-code-coverage"
+  mutation_hint: "# Use muter: swift run muter"
+
+Kotlin:
+  runner: "gradle test"
+  file_pattern: "src/test/kotlin/**/*Test.kt"
+  coverage_flag: "gradle jacocoTestReport jacocoTestCoverageVerification"
+  mutation_hint: "# Use Pitest Kotlin plugin in build.gradle" 

@@ -1,0 +1,180 @@
+selenium:
+  concern: "Web UI interaction, button clicks, form submission, DOM validation, navigation"
+  install: "pip install selenium webdriver-manager pytest"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install selenium webdriver-manager pytest
+    cd /workspace/{workspace_path}
+    pytest -v tests/e2e/test_ui_* --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache
+
+playwright:
+  concern: "Modern web UI, cross-browser E2E, screenshot/visual regression, JS-heavy SPAs"
+  install: "pip install playwright pytest-playwright && playwright install"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache playwright-report"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install playwright pytest-playwright
+    playwright install --with-deps chromium
+    cd /workspace/{workspace_path}
+    pytest -v tests/e2e/test_e2e_* --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache playwright-report
+
+cypress:
+  concern: "JavaScript/TypeScript front-end E2E, real-time reload, component testing"
+  install: "npm install cypress --save-dev"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh node_modules/.cache cypress/screenshots cypress/videos"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    apt-get update -y && apt-get install -y nodejs npm 2>/dev/null
+    cd /workspace/{workspace_path} && npm install
+    npx cypress run --reporter spec
+    # Teardown
+    rm -rf tests/ .gitignore script.sh node_modules/.cache cypress/screenshots cypress/videos
+
+vitest:
+  concern: "Vite-based TypeScript/JavaScript unit and integration tests, ESM-native, fast HMR-aware"
+  install: "npm install vitest @vitest/coverage-v8 --save-dev"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh coverage/ node_modules/.vite"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    apt-get update -y && apt-get install -y nodejs npm 2>/dev/null
+    cd /workspace/{workspace_path} && npm install
+    npx vitest run --coverage --coverage.threshold.lines=80
+    # Teardown
+    rm -rf tests/ .gitignore script.sh coverage/ node_modules/.vite
+
+appium:
+  concern: "Native/hybrid mobile app testing (iOS & Android), gestures, device simulation"
+  install: "pip install Appium-Python-Client pytest"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install Appium-Python-Client pytest
+    # Appium server must be running: appium &
+    cd /workspace/{workspace_path}
+    pytest -v tests/e2e/test_mobile_* --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache
+
+jmeter:
+  concern: "Load testing, stress testing, throughput, latency, API performance at scale"
+  install: "apt-get install -y default-jre && wget apache-jmeter archive"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh apache-jmeter-* results.jtl"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    apt-get update -y && apt-get install -y default-jre wget tar 2>/dev/null
+    wget -q https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+    tar -xzf apache-jmeter-5.6.3.tgz
+    cd /workspace/{workspace_path}
+    ../apache-jmeter-5.6.3/bin/jmeter -n -t tests/load_test.jmx -l results.jtl -e -o results_report
+    # Teardown
+    rm -rf tests/ .gitignore script.sh apache-jmeter-5.6.3* apache-jmeter-5.6.3.tgz results.jtl results_report
+
+locust:
+  concern: "Python-native load/stress testing, concurrent users, ramp-up scenarios"
+  install: "pip install locust"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install locust
+    cd /workspace/{workspace_path}
+    locust -f tests/locustfile.py --headless -u 100 -r 10 --run-time 1m --html locust_report.html
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ locust_report.html
+
+requests_pytest:
+  concern: "REST/GraphQL API contract testing, status codes, response schema, auth flows"
+  install: "pip install requests pytest jsonschema pytest-cov"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache .coverage coverage.xml"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install requests pytest jsonschema pytest-cov
+    cd /workspace/{workspace_path}
+    pytest -v tests/integration/test_api_* \
+      --cov=. --cov-report=term-missing --cov-fail-under=80 --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache .coverage coverage.xml
+
+pact:
+  concern: "Consumer-driven contract testing for REST and GraphQL microservices; prevents provider regressions without full E2E"
+  install: "pip install pact-python pytest  # or: npm install @pact-foundation/pact --save-dev"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh pacts/ __pycache__ .pytest_cache"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install pact-python pytest
+    cd /workspace/{workspace_path}
+    # Consumer side: generate pacts
+    pytest -v tests/integration/test_pact_consumer_* --tb=short
+    # Provider side: verify pacts
+    pytest -v tests/integration/test_pact_provider_* --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh pacts/ __pycache__ .pytest_cache
+
+postman_newman:
+  concern: "Existing Postman collections, CI-friendly API regression runs"
+  install: "npm install -g newman newman-reporter-htmlextra"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh newman/"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    apt-get update -y && apt-get install -y nodejs npm 2>/dev/null
+    npm install -g newman newman-reporter-htmlextra
+    cd /workspace/{workspace_path}
+    newman run tests/collection.json -e tests/environment.json \
+      --reporters cli,htmlextra --reporter-htmlextra-export newman/report.html
+    # Teardown
+    rm -rf tests/ .gitignore script.sh newman/
+
+owasp_zap:
+  concern: "Security scanning, XSS, SQL injection, OWASP Top-10 vulnerability detection"
+  install: "docker pull ghcr.io/zaproxy/zaproxy:stable"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh zap_report.html"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    apt-get update -y && apt-get install -y docker.io 2>/dev/null
+    docker run -t ghcr.io/zaproxy/zaproxy:stable \
+      zap-baseline.py -t http://target-url -r zap_report.html
+    # Teardown
+    rm -rf tests/ .gitignore script.sh zap_report.html
+
+axe_playwright:
+  concern: "WCAG accessibility compliance, screen-reader compatibility, colour contrast"
+  install: "pip install playwright pytest-playwright axe-playwright-python"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache playwright-report"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install playwright pytest-playwright axe-playwright-python
+    playwright install --with-deps chromium
+    cd /workspace/{workspace_path}
+    pytest -v tests/e2e/test_accessibility_* --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache playwright-report
+
+db_pytest:
+  concern: "Data integrity, migrations, stored procedures, query correctness, connection pooling"
+  install: "pip install pytest sqlalchemy psycopg2-binary pytest-cov alembic"
+  teardown_hint: "rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache .coverage"
+  script_hint: |
+    #!/bin/bash
+    set -e
+    pip install pytest sqlalchemy psycopg2-binary pytest-cov alembic
+    cd /workspace/{workspace_path}
+    pytest -v tests/integration/test_db_* \
+      --cov=. --cov-report=term-missing --cov-fail-under=80 --tb=short
+    # Teardown
+    rm -rf tests/ .gitignore script.sh __pycache__ .pytest_cache .coverage
