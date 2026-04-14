@@ -6,3 +6,7 @@ __pycache__/
 venv/ 
 *.log 
 .pytest_cache/ 
+/agents/coder_agent/.env
+/agents/tester_agent/.env
+/agents/spec_agent/.env
+/agents/reviewer_agent/.env

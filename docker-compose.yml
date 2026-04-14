@@ -1,0 +1,83 @@
+services:
+  # =========================
+  # INFRASTRUCTURE
+  # =========================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    depends_on:
+      - zookeeper
+
+  # =========================
+  # ORCHESTRATOR
+  # =========================
+  orchestrator-api:
+    build: .
+    container_name: orchestrator-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /workspaces:/workspaces
+    env_file:
+      - .env
+    environment:
+      - KAFKA_BROKERS=["kafka:9092"]
+      - SPEC_AGENT_URL=http://spec-agent:8001
+      - CODER_AGENT_URL=http://coder-agent:8002
+      - TESTER_AGENT_URL=http://tester-agent:8003
+      - REVIEWER_AGENT_URL=http://reviewer-agent:8004
+    command: [ "python", "-m", "orchestrator.main" ]
+    depends_on:
+      - kafka
+
+  # =========================
+  # AGENTS
+  # =========================
+  spec-agent:
+    build: .
+    container_name: spec-agent
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    command: [ "uvicorn", "agents.spec_agent.main:app", "--host", "0.0.0.0", "--port", "8001" ]
+    depends_on:
+      - kafka
+
+  coder-agent:
+    build: .
+    container_name: coder-agent
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    command: [ "uvicorn", "agents.coder_agent.main:app", "--host", "0.0.0.0", "--port", "8002" ]
+    depends_on:
+      - kafka
+
+  tester-agent:
+    build: .
+    container_name: tester-agent
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    command: [ "uvicorn", "agents.tester_agent.main:app", "--host", "0.0.0.0", "--port", "8003" ]
+    depends_on:
+      - kafka
+
+volumes:
+  workspaces:

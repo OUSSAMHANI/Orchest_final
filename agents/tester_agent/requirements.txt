@@ -1,0 +1,30 @@
+FastAPI
+langchain_core
+
+# Core Framework
+fastapi 
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# LangGraph (Orchestration)
+langgraph
+langchain-core
+
+# HTTP Client
+requests
+httpx
+
+# LLM Providers
+groq
+
+# Git Operations
+gitpython
+
+# Environment & Config
+python-dotenv
+
+# Testing
+pytest
+pytest-asyncio
+pytest-cov

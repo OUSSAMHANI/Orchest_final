@@ -105,3 +105,30 @@ def start_kafka_consumer(
     )
     consumer.start()
     return consumer
+
+
+if __name__ == "__main__":
+    from shared.config.settings import get_settings
+    
+    settings = get_settings()
+    
+    # Configure logging for standalone run
+    logging.basicConfig(
+        level=getattr(logging, settings.LOG_LEVEL),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    logger.info("Starting Orchestrator Kafka Consumer...")
+    logger.info(f"Brokers: {settings.KAFKA_BROKERS}")
+    logger.info(f"Topic: {settings.KAFKA_TOPIC_TICKETS}")
+    
+    try:
+        start_kafka_consumer(
+            bootstrap_servers=settings.KAFKA_BROKERS,
+            topic=settings.KAFKA_TOPIC_TICKETS,
+            consumer_group=settings.KAFKA_CONSUMER_GROUP,
+        )
+    except KeyboardInterrupt:
+        logger.info("Consumer stopped by user")
+    except Exception as e:
+        logger.error(f"Consumer crashed: {e}")

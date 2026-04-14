@@ -1,5 +1,5 @@
 """
-Tester Agent - Runs tests and validates changes.
+Coder Agent - Generates code based on specifications.
 """
 
 from fastapi import FastAPI
@@ -10,39 +10,37 @@ app = FastAPI(title="Tester Agent", version="1.0.0")
 @app.post("/execute")
 async def execute(request: AgentInput) -> AgentOutput:
     """
-    Run tests and validate changes.
+    Generate code based on specification.
     
     Expected output:
     {
-        "tests_passed": 42,
-        "tests_failed": 0,
-        "tests_skipped": 3,
-        "coverage": 87.5,
-        "report_file": "path/to/report.json",
-        "failures": []
+        "files": ["modified/file1.py", "created/file2.py"],
+        "changes": "Description of changes",
+        "branch": "feature/branch-name",
+        "commit_hash": "abc123...",
+        "diff": "git diff output"
     }
     """
     # TODO: Implement by coworker
     return AgentOutput(
         status="success",
         output={
-            "tests_passed": 0,
-            "tests_failed": 0,
-            "tests_skipped": 0,
-            "coverage": None,
-            "report_file": None,
-            "failures": []
+            "files": [],
+            "changes": "",
+            "branch": None,
+            "commit_hash": None,
+            "diff": None
         },
         confidence=0.0,
-        metadata={"agent": "tester", "step_id": request.step_id}
+        metadata={"agent": "coder", "step_id": request.step_id}
     )
 
 @app.get("/health")
 async def health():
     """Health check endpoint."""
-    return {"status": "healthy", "agent": "tester"}
+    return {"status": "healthy", "agent": "coder"}
 
 @app.get("/ready")
 async def ready():
     """Readiness check endpoint."""
-    return {"status": "ready", "agent": "tester"}
+    return {"status": "ready", "agent": "coder"}

@@ -1,0 +1,10 @@
+FastAPI
+langchain_core
+langchain_google_genai
+langchain_openai
+langchain_anthropic
+langchain_groq
+langchain_openrouter
+langchain_community
+docker
+langchain-mcp-adapters
