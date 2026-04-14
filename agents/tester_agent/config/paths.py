@@ -10,9 +10,9 @@ import os
 from pathlib import Path
 
 
-def _find_project_root() -> Path:
+def _find_project_root(root_dir : str = None) -> Path:
     """Climb the directory tree until we find a root marker."""
-    markers = {"pyproject.toml", "setup.py", "setup.cfg", ".git"}
+    markers = {"pyproject.toml", "setup.py", "setup.cfg", ".git", "requirements.txt"}
     current = Path(__file__).resolve()
 
     for parent in [current, *current.parents]:
@@ -22,8 +22,8 @@ def _find_project_root() -> Path:
     # Fallback: three levels up from src/config/paths.py → project root
     return current.parent.parent.parent
 
-
-PROJECT_ROOT = _find_project_root()
+ROOT_DIR     = os.getenv("ROOT_DIR", None)
+PROJECT_ROOT = _find_project_root(ROOT_DIR)
 RESOURCES    = PROJECT_ROOT / "resources"
 LANGUAGES    = RESOURCES / "languages"
 AGENTS       = RESOURCES / "agents"

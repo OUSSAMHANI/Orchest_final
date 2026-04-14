@@ -12,7 +12,7 @@ from pathlib import Path
 
 def _find_project_root() -> Path:
     """Climb the directory tree until we find a root marker."""
-    markers = {"pyproject.toml", "setup.py", "setup.cfg", ".git"}
+    markers = {"pyproject.toml", "setup.py", "setup.cfg", ".git", "requirements.txt"}
     current = Path(__file__).resolve()
 
     for parent in [current, *current.parents]:

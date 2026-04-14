@@ -28,3 +28,7 @@ python-dotenv
 pytest
 pytest-asyncio
 pytest-cov
+
+ddgs
+
+langchain-mcp-adapters
