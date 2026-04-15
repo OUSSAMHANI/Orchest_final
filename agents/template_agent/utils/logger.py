@@ -29,7 +29,7 @@ from typing import Any
 
 # ── Constants ────────────────────────────────────────────────────────────────
 _LOGS_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "Logs")
+    os.path.join(os.path.dirname(__file__), "..", "logs")
 )
 _CHAT_LOGS_DIR = os.path.join(_LOGS_DIR, "chatLogs")
 

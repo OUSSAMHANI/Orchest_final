@@ -21,6 +21,7 @@ from fastapi import FastAPI
 from shared.schemas.agent_io import AgentInput, AgentOutput, AgentStatus
 from agents.coder_agent.agents.coding_agent import coding_agent_node
 from agents.coder_agent.llm.base_config import MODEL_PROFILE_STANDARD
+from utils.logger import log_request_start
 
 app = FastAPI(title="Coder Agent", version="1.0.0")
 
@@ -31,18 +32,39 @@ async def execute(request: AgentInput) -> AgentOutput:
     """
     # Build the initial GraphState for the agent node
     # The agent expects 'spec', 'workspace_dir', and 'model_profile' etc.
-    state = {
-        "spec": request.previous_outputs.get("spec", {}).get("spec_text", "") or request.step_description,
-        "repo_url": request.ticket.get("repo_url", ""),
+    prev_spec = request.previous_outputs.get("spec", {}) if request.previous_outputs else {}
+    if prev_spec is None: prev_spec = {}
+    
+    spec_text = prev_spec.get("spec_text", "") or request.step_description
+
+    initial_state_snapshot = {
+        "spec": spec_text,
+        "repo_url": request.ticket.get("repo_url", "") if request.ticket else "",
+        "step_id": request.step_id,
         "workspace_path": request.workspace_path,
-        "model_profile": request.metadata.get("model_profile", MODEL_PROFILE_STANDARD),
-        "iteration_count": request.metadata.get("retry_count", 0),
+    }
+    log_file_path, chat_log_file_path = log_request_start(
+        endpoint="/execute",
+        http_method="POST",
+        initial_state=initial_state_snapshot,
+        entry_agent="coding_agent",
+        graph_nodes=["coding_agent"],
+    )
+
+    state = {
+        "spec": spec_text,
+        "repo_url": request.ticket.get("repo_url", "") if request.ticket else "",
+        "workspace_path": request.workspace_path,
+        "model_profile": request.metadata.get("model_profile", MODEL_PROFILE_STANDARD) if request.metadata else MODEL_PROFILE_STANDARD,
+        "iteration_count": request.metadata.get("retry_count", 0) if request.metadata else 0,
         "total_tokens": 0,
         "step_id": request.step_id,
         "agent_reports": [],
-        "mcp_servers": request.metadata.get("mcp_servers", []),
-        "detected_language": request.metadata.get("detected_language"),
-        "detected_framework": request.metadata.get("detected_framework"),
+        "mcp_servers": request.metadata.get("mcp_servers", []) if request.metadata else [],
+        "detected_language": request.metadata.get("detected_language") if request.metadata else None,
+        "detected_framework": request.metadata.get("detected_framework") if request.metadata else None,
+        "log_file_path": log_file_path,
+        "chat_log_file_path": chat_log_file_path,
     }
 
     try:

@@ -9,4 +9,4 @@ langchain_openrouter
 langchain_community
 docker
 langchain-mcp-adapters
-uvicorn[standard]
+ddgs

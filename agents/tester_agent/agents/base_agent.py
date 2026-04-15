@@ -34,7 +34,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
 from config.agent_config import AgentConfig
 from llm.base_config import get_llm
-from mcp.client import MCPClientManager
+from agent_mcp.client import MCPClientManager
 from state import AgentReport, GraphState
 from utils.logger import log_chat_interaction, log_llm_interaction
 from llm.tool_binder import ToolBinder
@@ -334,6 +334,12 @@ class BaseAgent(abc.ABC):
                     ToolMessage(content=result, tool_call_id=call_id)
                 )
 
+                extra_nudge = await self.post_tool_nudge(
+                    [c for c in response.tool_calls], state
+                )
+                if extra_nudge:
+                    _append_nudge(messages, extra_nudge)
+
             # ── Prune conversation history ─────────────────────────────────────
             if len(messages) > 2 + MAX_HISTORY:
                 recent = messages[2:][-MAX_HISTORY:]
@@ -412,6 +418,15 @@ class BaseAgent(abc.ABC):
         if status == "partial":
             return ["continue_current_agent", "proceed_with_caution"]
         return []
+
+    async def post_tool_nudge(
+        self, tools_called_this_turn: list[dict], state: GraphState
+    ) -> str | None:
+        """
+        Return a nudge string to append, or None.
+        Called after every tool-call batch. Override in subclasses.
+        """
+        return None
 
 # ── Module-level helpers ──────────────────────────────────────────────────────
 

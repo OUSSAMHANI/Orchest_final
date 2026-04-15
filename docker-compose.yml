@@ -63,6 +63,9 @@ services:
     container_name: spec-agent
     ports:
       - "8001:8001"
+    volumes:
+      - ./agents/spec_agent/logs:/app/agents/spec_agent/logs
+      - workspaces:/workspaces
     env_file:
       - .env
     # command: >
@@ -79,6 +82,9 @@ services:
     container_name: coder-agent
     ports:
       - "8002:8002"
+    volumes:
+      - ./agents/coder_agent/logs:/app/agents/coder_agent/logs
+      - workspaces:/workspaces
     env_file:
       - .env
     # command: >
@@ -95,6 +101,9 @@ services:
     container_name: tester-agent
     ports:
       - "8003:8003"
+    volumes:
+      - ./agents/tester_agent/logs:/app/agents/tester_agent/logs
+      - workspaces:/workspaces
     env_file:
       - .env
     # command: >

@@ -1,0 +1,8 @@
+#Implement a verbose logic for long context models and a small one for short context models
+verbose: "" # Long context model prompt
+compact: "" # Short context model prompt
+
+coverage: 
+pyramid:
+
+tests_not_run: ""

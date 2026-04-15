@@ -2,8 +2,9 @@
 import os
 import shutil
 from langchain_community.agent_toolkits import FileManagementToolkit
+from langchain.tools import tool
 
-
+@tool
 def initiate_directory(workspace_dir: str) -> list:
     """
     Create a directory at the specified path.
@@ -14,7 +15,7 @@ def initiate_directory(workspace_dir: str) -> list:
     os.makedirs(workspace_dir, exist_ok=True)
     return ["Directory created successfully"]
 
-
+@tool
 def clear_directory(workspace_dir: str) -> list:
     """
     Remove every file and sub-directory inside *workspace_dir*,

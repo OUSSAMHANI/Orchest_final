@@ -1,9 +1,0 @@
-verbose: "SYSTEM NUDGE: Use 'write_file' to create tests/ files and script.sh. Call the tool NOW."
-compact: "SYSTEM NUDGE: Use 'write_file' to create tests/ files and script.sh. Call the tool NOW."
-
-coverage: "SYSTEM NUDGE: No coverage flags detected in script.sh. Add --cov / -cover / --collect coverage to the run command NOW before writing script.sh."
-
-pyramid: "SYSTEM NUDGE: Only E2E tests written so far. Add unit tests in 'tests/unit/' and integration tests in 'tests/integration/' before finalising. Call 'write_file' NOW."
-
-# testing agent has no run_tests step — this key is required by BaseAgent but unused
-tests_not_run: ""

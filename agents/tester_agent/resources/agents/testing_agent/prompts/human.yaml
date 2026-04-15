@@ -28,8 +28,10 @@ verbose: |
    5. Include at least one security negative test for any input-handling or auth code.
    6. Write the '.gitignore' file to exclude test artifacts (tests/, script.sh, coverage/, node_modules,
       __pycache__, *.lcov, *.xml).
-   7. Write the 'script.sh' lifecycle script:
-      Install → Execute (with coverage flags if available) → Coverage Report → Teardown.
+   7. Write the 'script.sh' lifecycle script using the runner for {detected_language}:
+      Install → Execute with coverage flags ({coverage_flag}) → Coverage Report → Teardown.
+      If a mutation testing hint is available ({mutation_hint}), add it as a commented-out
+      optional step after the coverage report — do not make it mandatory.
    8. Run the suite using the appropriate tool from the catalogue.
    9. If tests fail due to test logic errors, fix them and re-run; if they fail due to bugs in the
       implementation, report them with the exact file, line, and a description of the observed vs
@@ -56,5 +58,6 @@ compact: |
     4. add performance assertions for I/O paths
     5. add security negative tests for input/auth code
     6. write .gitignore
-    7. write script.sh (Install → Run with coverage → Report → Teardown)
+    7. write script.sh (Install → Run with {coverage_flag} → Report → Teardown)
+       Optional mutation hint: {mutation_hint}
     8. execute and fix logic errors; report implementation bugs with file+line detail

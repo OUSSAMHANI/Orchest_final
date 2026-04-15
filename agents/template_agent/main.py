@@ -1,5 +1,5 @@
 """
-Tester Agent - Generates tests based on specifications.
+Template Agent - Placeholder for a new agent.
 """
 import os
 import sys
@@ -11,7 +11,6 @@ if PROJ_ROOT not in sys.path:
     sys.path.append(PROJ_ROOT)
 
 # Also ensure the agent's Own directory is in sys.path so 'from state import ...' works
-# if it's meant to be local to the agent.
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if AGENT_DIR not in sys.path:
     sys.path.append(AGENT_DIR)
@@ -19,64 +18,76 @@ if AGENT_DIR not in sys.path:
 
 from fastapi import FastAPI
 from shared.schemas.agent_io import AgentInput, AgentOutput, AgentStatus
-from agents.tester_agent.agents.testing_agent import testing_agent_node
-from agents.tester_agent.llm.base_config import MODEL_PROFILE_STANDARD
+from agents.template_agent.agents.concrete_agent import template_agent_node
+from agents.template_agent.llm.base_config import MODEL_PROFILE_STANDARD
 
-app = FastAPI(title="Tester Agent", version="1.0.0")
+app = FastAPI(title="Template Agent", version="1.0.0")
 
 @app.post("/execute")
 async def execute(request: AgentInput) -> AgentOutput:
     """
-    Generate tests based on specification.
+    Execute the agent's logic.
     """
     # Build the initial GraphState for the agent node
-    # The agent expects 'spec', 'workspace_dir', and 'model_profile' etc.
-    state = {
-        "spec": request.previous_outputs.get("spec", {}).get("spec_text", "") or request.step_description,
-        "repo_url": request.ticket.get("repo_url", ""),
+    prev_spec = request.previous_outputs.get("spec", {}) if request.previous_outputs else {}
+    if prev_spec is None: prev_spec = {}
+    
+    spec_text = prev_spec.get("spec_text", "") or request.step_description
+
+    initial_state_snapshot = {
+        "spec": spec_text,
+        "repo_url": request.ticket.get("repo_url", "") if request.ticket else "",
+        "step_id": request.step_id,
         "workspace_path": request.workspace_path,
-        "model_profile": request.metadata.get("model_profile", MODEL_PROFILE_STANDARD),
-        "iteration_count": request.metadata.get("retry_count", 0),
+    }
+    
+    # Import locally to avoid issues during generation
+    from utils.logger import log_request_start
+    log_file_path, chat_log_file_path = log_request_start(
+        endpoint="/execute",
+        http_method="POST",
+        initial_state=initial_state_snapshot,
+        entry_agent="template_agent",
+        graph_nodes=["template_agent"],
+    )
+
+    state = {
+        "spec": spec_text,
+        "repo_url": request.ticket.get("repo_url", "") if request.ticket else "",
+        "workspace_path": request.workspace_path,
+        "model_profile": request.metadata.get("model_profile", MODEL_PROFILE_STANDARD) if request.metadata else MODEL_PROFILE_STANDARD,
+        "iteration_count": request.metadata.get("retry_count", 0) if request.metadata else 0,
         "total_tokens": 0,
         "step_id": request.step_id,
         "agent_reports": [],
-        "mcp_servers": request.metadata.get("mcp_servers", []),
-        "detected_language": request.metadata.get("detected_language"),
-        "detected_framework": request.metadata.get("detected_framework"),
+        "mcp_servers": request.metadata.get("mcp_servers", []) if request.metadata else [],
+        "detected_language": request.metadata.get("detected_language") if request.metadata else None,
+        "detected_framework": request.metadata.get("detected_framework") if request.metadata else None,
         "test_output": "",
         "tests_passed": False,
+        "log_file_path": log_file_path,
+        "chat_log_file_path": chat_log_file_path,
     }
 
     try:
         # Run the agent node
-        result_state = await testing_agent_node(state)
+        result_state = await template_agent_node(state)
         
         # Extract report
         report = result_state.get("orchestrator_inbox", {})
         
-        # Map results to TesterAgentOutput structure
-        tests_passed_count = 1 if result_state.get("tests_passed") else 0
-        tests_failed_count = 1 if not result_state.get("tests_passed") and result_state.get("agent_outcome") == "failed" else 0
-        
         return AgentOutput(
             status=result_state.get("agent_outcome", "success"),
             output={
-                "tests_passed": tests_passed_count,
-                "tests_failed": tests_failed_count,
-                "tests_skipped": 0,
-                "tests_total": tests_passed_count + tests_failed_count,
-                "coverage": 0.0,
-                "report_file": None,
-                "failures": [{"message": i} for i in report.get("issues", [])] if tests_failed_count > 0 else [],
-                "tests_generated": result_state.get("tests_generated", 0)
+                "report": report,
+                "summary": result_state.get("summary", ""),
             },
             confidence=0.9 if result_state.get("agent_outcome") == "success" else 0.5,
             metadata={
-                "agent": "tester",
+                "agent": "template_agent",
                 "step_id": request.step_id,
                 "tokens": result_state.get("total_tokens", 0),
                 "iterations": result_state.get("iteration_count", 0),
-                "issues": report.get("issues", [])
             }
         )
     except Exception as e:
@@ -85,15 +96,15 @@ async def execute(request: AgentInput) -> AgentOutput:
             output={},
             confidence=0.0,
             error=str(e),
-            metadata={"agent": "tester", "step_id": request.step_id}
+            metadata={"agent": "template_agent", "step_id": request.step_id}
         )
 
 @app.get("/health")
 async def health():
     """Health check endpoint."""
-    return {"status": "healthy", "agent": "tester"}
+    return {"status": "healthy", "agent": "template_agent"}
 
 @app.get("/ready")
 async def ready():
     """Readiness check endpoint."""
-    return {"status": "ready", "agent": "tester"}
+    return {"status": "ready", "agent": "template_agent"}
