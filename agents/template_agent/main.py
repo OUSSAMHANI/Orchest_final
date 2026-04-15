@@ -20,6 +20,7 @@ from fastapi import FastAPI
 from shared.schemas.agent_io import AgentInput, AgentOutput, AgentStatus
 from agents.template_agent.agents.concrete_agent import template_agent_node
 from agents.template_agent.llm.base_config import MODEL_PROFILE_STANDARD
+from utils.state_mapper import map_previous_outputs
 
 app = FastAPI(title="Template Agent", version="1.0.0")
 
@@ -29,10 +30,12 @@ async def execute(request: AgentInput) -> AgentOutput:
     Execute the agent's logic.
     """
     # Build the initial GraphState for the agent node
-    prev_spec = request.previous_outputs.get("spec", {}) if request.previous_outputs else {}
-    if prev_spec is None: prev_spec = {}
-    
-    spec_text = prev_spec.get("spec_text", "") or request.step_description
+    spec_text = map_previous_outputs(
+        previous_outputs=request.previous_outputs,
+        target_key="spec",          #Default to spec, change it if need another agent output
+        fields=["requirements", "acceptance_criteria", "constraints", "implementation_notes", "suggested_files", "dependencies"],   #Default to spec fields, change it if need another agent output
+        fallback=request.step_description
+    )
 
     initial_state_snapshot = {
         "spec": spec_text,
