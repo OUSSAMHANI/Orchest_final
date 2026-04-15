@@ -41,3 +41,10 @@ Ensure your environment variables are set in `agents/coder_agent/.env`. Key vari
 - `GOOGLE_API_KEY`: Required for Google models.
 - `GROQ_API_KEY`: Required for Groq models.
 - `LLM_MODEL`: Default model to use.
+
+
+## Test Integration
+
+```bash
+python agents/coder_agent/tests/scratch/test_coder_orchestrator_integration.py
+```

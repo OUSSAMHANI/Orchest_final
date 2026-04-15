@@ -1,0 +1,7 @@
+verbose: |
+  You are a helpful AI agent.
+  Your role is defined by the task you are given.
+  Work carefully and methodically.
+
+compact: |
+  You are a helpful AI agent. Work carefully on the task given.

@@ -38,29 +38,29 @@ def _language_runners() -> dict[str, dict]:
         return yaml.safe_load(fh)
 
 
+# testing_agent.py — replace both catalogue builders
+
 def _build_catalogue(verbose: bool) -> str:
     tools = _qa_tools()
     if verbose:
-        return "\n\n".join(
-            f"[{key}]\n"
-            f"  Concern   : {meta['concern']}\n"
-            f"  Install   : {meta['install']}\n"
-            f"  script.sh :\n"
-            + "\n".join(f"    {line}" for line in meta["script_hint"].splitlines())
-            for key, meta in tools.items()
-        )
+        lines = []
+        for key, meta in tools.items():
+            block = (
+                f"[{key}]\n"
+                f"  Concern      : {meta['concern']}\n"
+                f"  Install      : {meta['install']}\n"
+                f"  Teardown     : {meta.get('teardown_hint', 'rm -rf tests/ .gitignore script.sh')}\n"
+                f"  script.sh    :\n"
+            )
+            block += "\n".join(f"    {line}" for line in meta["script_hint"].splitlines())
+            lines.append(block)
+        return "\n\n".join(lines)
+    # compact: one line per tool, still show teardown hint so the LLM uses it
     return "\n".join(
-        f"  • [{key}] {meta['concern']}" for key, meta in tools.items()
+        f"  • [{key}] {meta['concern']}  "
+        f"[teardown: {meta.get('teardown_hint', 'rm -rf tests/ .gitignore script.sh')}]"
+        for key, meta in tools.items()
     )
-
-
-def _build_catalogue_full() -> str:
-    return "\n\n".join(
-        f"[{key}]\n Concern: {meta['concern']}\n Install: {meta['install']}\n script.sh :\n"
-        + "\n".join(f"    {line}" for line in meta["script_hint"].splitlines())
-        for key, meta in _qa_tools().items()
-    )
-
 
 class TestingAgent(BaseAgent):
 
@@ -69,34 +69,119 @@ class TestingAgent(BaseAgent):
 
     # ── Required: context dict ────────────────────────────────────────────────
 
+    # testing_agent.py — replace build_context
+# testing_agent.py — add instance variables in __init__ and two new methods
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._has_unit_tests:    bool = False
+        self._has_coverage_flag: bool = False
+        self._last_written_paths: list[str] = []
+
+    async def on_tool_result(
+        self, tool_name: str, result: str, state: GraphState
+    ) -> None:
+        await super().on_tool_result(tool_name, result, state)
+
+        if tool_name == "write_file":
+            # Track which sub-dirs have been written
+            lower = result.lower()
+            if "tests/unit" in lower:
+                self._has_unit_tests = True
+            if any(flag in lower for flag in ["--cov", "-cover", "--coverage", "jacocoTest"]):
+                self._has_coverage_flag = True
+            # Collect path hints for the report
+            for token in result.split():
+                if token.startswith("tests/") or token in ("script.sh", ".gitignore"):
+                    self._last_written_paths.append(token)
+
+        if tool_name == "run_tests":
+            # Flag coverage shortfall so post_tool_nudge can act on next turn
+            lower = result.lower()
+            if "coverage" in lower and any(
+                phrase in lower for phrase in
+                ["below", "fail", "short", "missing", "required"]
+            ):
+                self._issues.append("coverage_shortfall_detected")
+            if any(
+                phrase in lower for phrase in
+                ["performance", "too slow", "threshold exceeded", "time limit"]
+            ):
+                self._issues.append("performance_regression_detected")
+
+    async def post_tool_nudge(
+        self, tools_called_this_turn: list[dict], state: GraphState
+    ) -> str | None:
+        cfg = AgentConfig(self.agent_name)
+        profile = state.get("model_profile", {})
+        verbose = bool(profile.get("system_verbose"))
+
+        # Coverage shortfall — fires after run_tests reported a gap
+        if "coverage_shortfall_detected" in self._issues:
+            self._issues.remove("coverage_shortfall_detected")
+            return cfg.suffix("coverage_shortfall")
+
+        # Performance regression — fires after run_tests reported a perf failure
+        if "performance_regression_detected" in self._issues:
+            self._issues.remove("performance_regression_detected")
+            return cfg.suffix("performance_regression")
+
+        # Coverage flag missing — fires after script.sh is written without --cov
+        wrote_script = any(
+            c["name"] == "write_file" and "script.sh" in str(c.get("args", {}))
+            for c in tools_called_this_turn
+        )
+        if wrote_script and not self._has_coverage_flag:
+            return cfg.nudge(verbose, kind="coverage")
+
+        # Pyramid nudge — fires after test files written but no unit/ sub-dir yet
+        wrote_tests = any(
+            c["name"] == "write_file" and "tests/" in str(c.get("args", {}))
+            for c in tools_called_this_turn
+        )
+        if wrote_tests and not self._has_unit_tests:
+            return cfg.nudge(verbose, kind="pyramid")
+
+        return None
+    
     async def build_context(self, state: GraphState) -> dict[str, Any]:
         workspace_dir       = self._workspace_dir(state)
         language, framework = self._detect(state, workspace_dir)
-        # Cache for reuse in get_tools / build_report / extra_state_updates
         self._cached_workspace = workspace_dir
         self._cached_lang      = language
         self._cached_fw        = framework
 
-        hints               = get_hints(language)
-        profile             = state.get("model_profile", {})
-        verbose             = bool(profile.get("system_verbose"))
-        max_spec            = int(profile.get("max_spec",     1_500))
-        max_ticket          = int(profile.get("max_test_out", 800))
-        cfg                 = AgentConfig(self.agent_name)
+        hints    = get_hints(language)
+        profile  = state.get("model_profile", {})
+        verbose  = bool(profile.get("system_verbose"))
+        cfg      = AgentConfig(self.agent_name)
+
+        # ── Pull the new fields from language_runners.yaml ────────────────────
+        runners      = _language_runners()
+        lang_runner  = runners.get(language, {})
+        coverage_flag  = lang_runner.get("coverage_flag", "")
+        mutation_hint  = lang_runner.get("mutation_hint", "")
+        runner_cmd     = lang_runner.get("runner", hints.get("framework", ""))
+        # file_pattern from runners is richer (unit/ + integration/ + e2e/) than
+        # the old single-dir pattern from language_config
+        file_pattern   = lang_runner.get("file_pattern", hints.get("file_pattern", ""))
 
         ticket = state.get("ticket_text", "")
         spec   = state.get("spec", "")
+        max_spec   = int(profile.get("max_spec",     1_500))
+        max_ticket = int(profile.get("max_test_out", 800))
 
         return dict(
-            detected_language   = language,
-            detected_framework  = framework,
-            test_framework     = hints["framework"],
-            file_pattern       = hints["file_pattern"],
-            script_hint        = hints["script_hint"],
-            lang_conventions   = hints["convention"],
-            tool_catalogue      = _build_catalogue(verbose),
-            tool_catalogue_full = _build_catalogue_full(),
-            file_list_str       = self._file_list(
+            detected_language    = language,
+            detected_framework   = framework,
+            test_framework       = runner_cmd,
+            file_pattern         = file_pattern,
+            coverage_flag        = coverage_flag,   # NEW
+            mutation_hint        = mutation_hint,   # NEW
+            script_hint          = hints.get("script_hint", ""),
+            lang_conventions     = hints.get("convention", ""),
+            tool_catalogue       = _build_catalogue(verbose),
+            file_list_str        = self._file_list(
                 workspace_dir, int(profile.get("max_files", 30))
             ),
             ticket_text = (
@@ -157,6 +242,13 @@ class TestingAgent(BaseAgent):
     @staticmethod
     def _workspace_dir(state: GraphState) -> str:
         from config.paths import PROJECT_ROOT
+        
+        # 1. Prioritize explicit workspace_path from GraphState (usually passed by orchestrator)
+        explicit_path = state.get("workspace_path")
+        if explicit_path:
+            return str(explicit_path)
+            
+        # 2. Fallback to repo-based calculation
         repo_url = state.get("repo_url", "")
         base     = PROJECT_ROOT / "workspace"
         return str(

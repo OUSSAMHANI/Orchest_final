@@ -1,3 +1,42 @@
+# Template Agent (Agent Generator)
+
+A neutral blueprint for scaffolding new agents in the Orchest multi-agent system.
+It ships with a FastAPI server, LangGraph node logic, and a resource-based prompt system.
+
+## Quick Start: Generate a New Agent
+
+Run the interactive generator from anywhere in the project:
+
+```bash
+python agents/template_agent/generate.py
+```
+
+The CLI will walk you through four steps:
+
+| Step | What you provide |
+|------|-----------------|
+| **1 — Name** | `snake_case` agent name, e.g. `security_agent` |
+| **2 — Type** | **Executor** (`uses_tests=True`) or **Thinker** (`uses_tests=False`) |
+| **3 — Tools** | Numbered checklist from `data/tools.py` |
+| **4 — Prompts** | Multiline system & human prompts — type `:wq!` on an empty line to finish |
+
+### Agent Types
+
+- **Executor** — participates in the test-run nudge loop (`uses_tests=True`). Use for agents that execute code, run sandboxes, or perform actions with side-effects.
+- **Thinker** — pure reasoning / generation (`uses_tests=False`). Use for spec writers, reviewers, code generators.
+
+### After generation
+
+The new agent lives at `agents/<your_agent_name>/` and is **immediately runnable**:
+
+```bash
+uvicorn agents.<your_agent_name>.main:app --reload
+```
+
+All class names, import paths, FastAPI metadata, and prompt directories are
+automatically renamed to match your agent name.
+
+
 # This template agent is a placeholder for a new agent.
 
 Follow the next steps to create any new agent:
@@ -57,3 +96,23 @@ compact: |
 
 7. Modify the state file to match requirements.
 8. Add .env to the project with env variables.
+
+## Folder Structure
+
+- `main.py`: Entry point for the FastAPI server.
+- `agents/`: Contains the LangGraph node and core logic.
+- `resources/`: Prompts and language-specific configurations.
+- `llm/`: LLM configuration, tool binders, and repair logic.
+- `tools/`: Reusable tools (files, folders, docker, etc.).
+- `utils/`: Helper utilities (language detection, etc.).
+- `generate.py`: Automation script to clone this template.
+
+## Running the Agent
+
+Once generated, you can run the agent locally:
+
+```bash
+python main.py
+```
+
+The agent will be available at `http://localhost:8000`.

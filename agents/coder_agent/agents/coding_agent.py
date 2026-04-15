@@ -118,6 +118,13 @@ class CodingAgent(BaseAgent):
     @staticmethod
     def _workspace_dir(state: GraphState) -> str:
         from config.paths import PROJECT_ROOT
+        
+        # 1. Prioritize explicit workspace_path from GraphState (usually passed by orchestrator)
+        explicit_path = state.get("workspace_path")
+        if explicit_path:
+            return str(explicit_path)
+            
+        # 2. Fallback to repo-based calculation
         repo_url = state.get("repo_url", "")
         base     = PROJECT_ROOT / "workspace"
         return str(

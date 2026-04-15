@@ -34,7 +34,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
 from config.agent_config import AgentConfig
 from llm.base_config import get_llm
-from mcp.client import MCPClientManager
+from agent_mcp.client import MCPClientManager
 from state import AgentReport, GraphState
 from utils.logger import log_chat_interaction, log_llm_interaction
 from llm.tool_binder import ToolBinder

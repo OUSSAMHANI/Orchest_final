@@ -43,6 +43,13 @@ class AgentConfig:
             return cfg["tests_not_run"]
         return cfg["verbose"] if verbose else cfg["compact"]
 
+    def suffix(self, kind: str) -> str:
+        """Return a named suffix string from suffixes.yaml, empty string if missing."""
+        cfg = self._load("suffixes.yaml")
+        if cfg is None:
+            return ""
+        return cfg.get(kind, "")
+
     def test_output_suffix(self, test_output: str, max_len: int) -> str:
         cfg  = self._load("suffixes.yaml")
         if cfg is None:

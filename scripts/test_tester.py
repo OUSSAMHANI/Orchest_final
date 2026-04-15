@@ -61,6 +61,20 @@ async def main():
         "mcp_servers": [],
     }
 
+    from utils.logger import log_request_start
+    log_file_path, chat_log_file_path = log_request_start(
+        endpoint="manual_test",
+        http_method="EXEC",
+        initial_state=state,
+        entry_agent="testing_agent",
+        graph_nodes=["testing_agent"],
+    )
+
+    state.update({
+        "log_file_path": log_file_path,
+        "chat_log_file_path": chat_log_file_path,
+    })
+
     agent = TestingAgent()
 
     print("[INFO] Running with real file system writes...")

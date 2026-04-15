@@ -1,0 +1,8 @@
+verbose: |
+  Complete the following task using the tools available to you.
+  Review the workspace files, understand the context, and produce high-quality output.
+  Spec: {spec_text}
+  Files: {file_list_str}
+
+compact: |
+  Complete the task. Spec: {spec_text}
