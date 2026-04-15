@@ -1,8 +1,5 @@
-FastAPI
-langchain_core
+fastapi
 
-# Core Framework
-fastapi 
 uvicorn[standard]
 pydantic
 pydantic-settings

@@ -1,4 +1,5 @@
 FastAPI
+langchain
 langchain_core
 langchain_google_genai
 langchain_openai
@@ -8,4 +9,4 @@ langchain_openrouter
 langchain_community
 docker
 langchain-mcp-adapters
-ddgspython-dotenv
+uvicorn[standard]

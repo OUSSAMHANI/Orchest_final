@@ -1,4 +1,4 @@
-FROM python:3.14.0-slim
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -29,4 +29,4 @@ RUN mkdir -p /workspaces logs && chmod -R 777 /workspaces logs
 EXPOSE 8000
 
 # Default command (can be overridden in docker-compose)
-CMD ["python", "-m", "orchestrator.main"]
+CMD ["python", "-m", "orchestrator.main"]
