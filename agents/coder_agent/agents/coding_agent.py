@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import os
 from typing import Any
-
 from langchain_core.tools import tool
-
-from agents.base_agent import BaseAgent
+from ..agents.base_agent import BaseAgent
 from config.agent_config import AgentConfig
 from config.language_config import get_docker_image, get_hints
 from state import AgentReport, GraphState

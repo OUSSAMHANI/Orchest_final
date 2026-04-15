@@ -1,4 +1,5 @@
 FastAPI
+langchain
 langchain_core
 langchain_google_genai
 langchain_openai
@@ -9,3 +10,4 @@ langchain_community
 docker
 langchain-mcp-adapters
 ddgs
+uvicorn[standard]

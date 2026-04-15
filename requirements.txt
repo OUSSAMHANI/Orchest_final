@@ -5,8 +5,8 @@ pydantic==2.10.4
 pydantic-settings==2.6.1
 
 # LangGraph (Orchestration)
-langgraph>=0.2.50
-langchain-core==0.2.38
+langgraph
+langchain-core
 
 # Kafka
 kafka-python==2.0.2

@@ -1,8 +1,5 @@
-FastAPI
-langchain_core
+fastapi
 
-# Core Framework
-fastapi 
 uvicorn[standard]
 pydantic
 pydantic-settings
@@ -10,6 +7,7 @@ pydantic-settings
 # LangGraph (Orchestration)
 langgraph
 langchain-core
+langchain
 
 # HTTP Client
 requests
@@ -32,3 +30,5 @@ pytest-cov
 ddgs
 
 langchain-mcp-adapters
+docker
+langchain_community
