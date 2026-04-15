@@ -12,7 +12,7 @@ from typing import Any
 
 import yaml
 
-from agents.base_agent import BaseAgent
+from ..agents.base_agent import BaseAgent
 from config.agent_config import AgentConfig
 from config.language_config import get_docker_image, get_hints
 from config.paths import AGENTS

@@ -10,3 +10,4 @@ langchain_community
 docker
 langchain-mcp-adapters
 ddgs
+uvicorn[standard]

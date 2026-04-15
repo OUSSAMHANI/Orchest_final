@@ -18,7 +18,7 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Expose the API port that the application runs on
-EXPOSE 8000
+EXPOSE 8003
 
 # Command to run the application
 CMD ["uvicorn", "agents.tester_agent.main:app", "--host", "0.0.0.0", "--port", "8003"]
