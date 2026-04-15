@@ -35,7 +35,25 @@ async def execute(request: AgentInput) -> AgentOutput:
     prev_spec = request.previous_outputs.get("spec", {}) if request.previous_outputs else {}
     if prev_spec is None: prev_spec = {}
     
-    spec_text = prev_spec.get("spec_text", "") or request.step_description
+    spec_text = ""
+    if isinstance(prev_spec, str):
+        spec_text = prev_spec
+    elif isinstance(prev_spec, dict):
+        if "spec_text" in prev_spec:
+            spec_text = prev_spec["spec_text"]
+        else:
+            parts = []
+            if prev_spec.get("requirements"):
+                parts.append("Requirements:\n- " + "\n- ".join(prev_spec["requirements"]))
+            if prev_spec.get("acceptance_criteria"):
+                parts.append("Acceptance Criteria:\n- " + "\n- ".join(prev_spec["acceptance_criteria"]))
+            if prev_spec.get("constraints"):
+                parts.append("Constraints:\n- " + "\n- ".join(prev_spec["constraints"]))
+            if prev_spec.get("implementation_notes"):
+                parts.append("Implementation Notes:\n" + prev_spec["implementation_notes"])
+            spec_text = "\n\n".join(parts)
+            
+    spec_text = spec_text.strip() or request.step_description
     
     initial_state_snapshot = {
         "spec": spec_text,

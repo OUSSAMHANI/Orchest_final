@@ -10,3 +10,4 @@ venv/
 /agents/tester_agent/.env
 /agents/spec_agent/.env
 /agents/reviewer_agent/.env
+docker-compose.yml

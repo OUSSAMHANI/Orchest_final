@@ -31,3 +31,6 @@ pytest-asyncio
 pytest-cov
 
 ddgs
+
+# Agent generator (optional, for interactive checkbox UI)
+questionary
