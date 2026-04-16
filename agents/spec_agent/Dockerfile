@@ -1,4 +1,3 @@
-# agents/spec_agent/Dockerfile
 FROM spec-agent-base:latest
 
 WORKDIR /app

@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY agents/coder_agent/requirements.txt .
+COPY agents/coder_agent/requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt
 

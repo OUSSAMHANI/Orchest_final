@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Copy requirements file first to leverage Docker cache
-COPY agents/tester_agent/requirements.txt .
+COPY agents/tester_agent/requirements.txt ./requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt

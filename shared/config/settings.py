@@ -27,46 +27,46 @@ class Settings(BaseSettings):
     # =========================
     # KAFKA CONFIGURATION
     # =========================
-    KAFKA_BROKERS: List[str] = Field(
-        default=["localhost:9092"],
-        description="Kafka broker addresses"
-    )
-    KAFKA_TOPIC_TICKETS: str = Field(
-        default="gitlab-tickets",
-        description="Topic for incoming tickets"
-    )
-    KAFKA_TOPIC_RESULTS: str = Field(
-        default="orchestrator-results",
-        description="Topic for results (optional)"
-    )
-    KAFKA_CONSUMER_GROUP: str = Field(
-        default="orchestrator-group",
-        description="Consumer group ID"
-    )
-    KAFKA_ENABLE_AUTO_COMMIT: bool = Field(
-        default=True,
-        description="Enable auto commit for Kafka"
-    )
-    KAFKA_AUTO_OFFSET_RESET: str = Field(
-        default="earliest",
-        description="Offset reset policy: earliest, latest, none"
-    )
-    KAFKA_SECURITY_PROTOCOL: Optional[str] = Field(
-        default=None,
-        description="Security protocol: PLAINTEXT, SSL, SASL_PLAINTEXT"
-    )
-    KAFKA_SASL_MECHANISM: Optional[str] = Field(
-        default=None,
-        description="SASL mechanism: PLAIN, SCRAM-SHA-256, etc."
-    )
-    KAFKA_SASL_USERNAME: Optional[str] = Field(
-        default=None,
-        description="SASL username"
-    )
-    KAFKA_SASL_PASSWORD: Optional[str] = Field(
-        default=None,
-        description="SASL password"
-    )
+    # KAFKA_BROKERS: List[str] = Field(
+    #     default=["localhost:9092"],
+    #     description="Kafka broker addresses"
+    # )
+    # KAFKA_TOPIC_TICKETS: str = Field(
+    #     default="gitlab-tickets",
+    #     description="Topic for incoming tickets"
+    # )
+    # KAFKA_TOPIC_RESULTS: str = Field(
+    #     default="orchestrator-results",
+    #     description="Topic for results (optional)"
+    # )
+    # KAFKA_CONSUMER_GROUP: str = Field(
+    #     default="orchestrator-group",
+    #     description="Consumer group ID"
+    # )
+    # KAFKA_ENABLE_AUTO_COMMIT: bool = Field(
+    #     default=True,
+    #     description="Enable auto commit for Kafka"
+    # )
+    # KAFKA_AUTO_OFFSET_RESET: str = Field(
+    #     default="earliest",
+    #     description="Offset reset policy: earliest, latest, none"
+    # )
+    # KAFKA_SECURITY_PROTOCOL: Optional[str] = Field(
+    #     default=None,
+    #     description="Security protocol: PLAINTEXT, SSL, SASL_PLAINTEXT"
+    # )
+    # KAFKA_SASL_MECHANISM: Optional[str] = Field(
+    #     default=None,
+    #     description="SASL mechanism: PLAIN, SCRAM-SHA-256, etc."
+    # )
+    # KAFKA_SASL_USERNAME: Optional[str] = Field(
+    #     default=None,
+    #     description="SASL username"
+    # )
+    # KAFKA_SASL_PASSWORD: Optional[str] = Field(
+    #     default=None,
+    #     description="SASL password"
+    # )
     
     # =========================
     # AGENT CONFIGURATION
